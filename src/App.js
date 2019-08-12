@@ -5,13 +5,12 @@ import BootstrapTable from 'react-bootstrap-table-next';
 import filterFactory, { textFilter, Comparator, numberFilter } from 'react-bootstrap-table2-filter';
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'; 
 import 'react-bootstrap-table2-toolkit/dist/react-bootstrap-table2-toolkit.min.css';
-import ls from 'local-storage';
 
 const cmp = {
   '!=': (val1, val2) => val1 !== val2,
   '>': (val1, val2) => val1 > val2,
   '>=': (val1, val2) => val1 >= val2,
-  '=': (val1, val2) => val1 = val2,
+  '=': (val1, val2) => val1 === val2,
   '<': (val1, val2) => val1 < val2,
   '<=': (val1, val2) => val1 <= val2, 
 }
@@ -47,8 +46,8 @@ const columns_fiche = [{
 }]
 
 const columns = [{
+  autoComplete: true,
   dataField: 'name',
-  mode: 'click',
   text: 'Nom de la biere',
   filter: textFilter()
 },
@@ -64,6 +63,7 @@ const columns = [{
 },
 {
   isDummyField: true,
+  text: 'Info',
   dataField: '',
   formatter: (cell, row) => ( 
     <button onClick={() => window.location.replace(`/biere/${row.id}`)}>Plus d'info</button>
@@ -90,6 +90,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      temp_biere: [],
       id: 1,
       singleBiere: [],
       pag: 1,
@@ -122,8 +123,8 @@ class App extends React.Component {
         this.setState({
           pag: page,
           biere: Response,
+          temp_biere: Response,
         })
-        ls.set('biere', Response)
       })
   }
 
@@ -139,8 +140,10 @@ class App extends React.Component {
   }
   
   handleTableChange = (type, { filters, page}) => {
+    // let ibu = parseInt(filters.ibu.filterVal.number, 10)
+    // let abv = parseInt(filters.i.filterVal.number, 10)
     if (type === "filter") {
-    let result = this.state.biere;
+    let result = this.state.temp_biere;
     result = result.filter((row) => {
       let valid = true;
       for (const dataField in filters) {
@@ -159,10 +162,10 @@ class App extends React.Component {
           if (comparator === Comparator.LIKE) {
             if (row[dataField] != null) {
               if (dataField === 'ibu') {
-                valid = cmp[filters.ibu.filterVal.comparator](row[dataField], filters.ibu.filterVal.number)
+                valid = cmp[filters.ibu.filterVal.comparator](row[dataField], parseInt(filters.ibu.filterVal.number, 10))
               }
               else if (dataField === 'abv') {
-                valid = cmp[filters.abv.filterVal.comparator](row[dataField], filters.abv.filterVal.number)
+                valid = cmp[filters.abv.filterVal.comparator](row[dataField], parseInt(filters.abv.filterVal.number, 10))
               }
             }
           } else {
@@ -189,11 +192,6 @@ class App extends React.Component {
     if (window.location.pathname === '/') {
       return (
         <div>
-          <button type="button" className="btn btn-dark"
-          onClick={() => window.location.replace('/')}
-          >
-            accueil
-          </button>
           <RemoteAll
           data={ biere }
           page={ page }
