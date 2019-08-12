@@ -66,7 +66,7 @@ const columns = [{
   text: 'Info',
   dataField: '',
   formatter: (cell, row) => ( 
-    <button onClick={() => window.location.replace(`/biere/${row.id}`)}>Plus d'info</button>
+    <button type="button" className="btn btn-info" onClick={() => window.location.replace(`/biere/${row.id}`)}>Plus d'info</button>
   )
 }
 ];
